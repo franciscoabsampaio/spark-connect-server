@@ -1,6 +1,7 @@
-grpcio>=1.48.1
-pyarrow>=1.0.0
-pandas>=1.0.5
-setuptools>=80.9.0
 docker>=7.1.0
+google>=3.0.0
+grpcio>=1.48.1
+pandas>=1.0.5
+pyarrow>=1.0.0
 pytest>=8.4.2
+setuptools>=80.9.0
