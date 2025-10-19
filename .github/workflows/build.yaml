@@ -56,5 +56,5 @@ jobs:
 
       - name: Test Docker image
         run: |
-          pip install pandas>=1.0.5 setuptools>=80.9.0 pyspark==${{ matrix.spark_version }} docker>=7.1.0 pytest>=8.4.2
+          pip install pyarrow>=1.0.0 pandas>=1.0.5 setuptools>=80.9.0 pyspark==${{ matrix.spark_version }} docker>=7.1.0 pytest>=8.4.2
           pytest -vs tests/
