@@ -15,7 +15,7 @@ jobs:
       - name: Load matrix JSON
         id: set-matrix
         run: |
-          MATRIX_JSON=$(cat VERSIONS.json)
+          MATRIX_JSON=$(jq -c . VERSIONS.json)
           echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
 
   build:
