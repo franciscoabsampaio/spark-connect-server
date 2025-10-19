@@ -3,5 +3,5 @@
 /opt/spark/bin/spark-submit \
   --class org.apache.spark.sql.connect.service.SparkConnectServer \
   --conf spark.connect.grpc.binding=0.0.0.0:15002 \
-  --jars /opt/spark/jars/delta-spark_2.12-3.2.0.jar,/opt/spark/jars/delta-storage-3.2.0.jar,/opt/spark/jars/spark-connect_2.12-3.5.7.jar \
+  --jars ${SPARK_HOME}/jars/delta-spark_${SCALA_VERSION}-${CATALOG_VERSION}.jar,${SPARK_HOME}/jars/delta-storage-${CATALOG_VERSION}.jar,${SPARK_HOME}/jars/spark-connect_${SCALA_VERSION}-${SPARK_VERSION}.jar \
   --name spark-connect-server

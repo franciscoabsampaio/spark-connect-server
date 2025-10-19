@@ -11,6 +11,12 @@ ARG JAVA_VERSION
 ARG SCALA_VERSION
 ARG SPARK_VERSION
 
+# Expose build arguments as environment variables to the entrypoint script
+ENV CATALOG_VERSION=${CATALOG_VERSION}
+ENV JAVA_VERSION=${JAVA_VERSION}
+ENV SCALA_VERSION=${SCALA_VERSION}
+ENV SPARK_VERSION=${SPARK_VERSION}
+
 # Switch to root to install dependencies
 USER root
 

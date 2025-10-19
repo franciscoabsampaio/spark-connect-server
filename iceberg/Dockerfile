@@ -14,9 +14,19 @@ ARG SPARK_VERSION
 # Switch to root to install dependencies
 USER root
 
+# Expose build arguments as environment variables to the entrypoint script
+ENV CATALOG_VERSION=${CATALOG_VERSION}
+ENV JAVA_VERSION=${JAVA_VERSION}
+ENV SCALA_VERSION=${SCALA_VERSION}
+ENV SPARK_VERSION=${SPARK_VERSION}
+
+# Derive SPARK_VERSION_MAJOR in a RUN, then persist it
+RUN SPARK_VERSION_MAJOR=$(echo "$SPARK_VERSION" | cut -d'.' -f1,2) && \
+    echo "SPARK_VERSION_MAJOR=$SPARK_VERSION_MAJOR" >> /etc/environment
+ENV SPARK_VERSION_MAJOR=${SPARK_VERSION_MAJOR}
+
 # Download the Iceberg and Spark Connect JARs into the Spark jars directory
-RUN SPARK_VERSION_MAJOR=$(echo "${SPARK_VERSION}" | cut -d'.' -f1,2) && \
-    apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/* && \
+RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/* && \
     # Spark Connect
     wget https://repo1.maven.org/maven2/org/apache/spark/spark-connect_${SCALA_VERSION}/${SPARK_VERSION}/spark-connect_${SCALA_VERSION}-${SPARK_VERSION}.jar \
       -P ${SPARK_HOME}/jars/ && \
