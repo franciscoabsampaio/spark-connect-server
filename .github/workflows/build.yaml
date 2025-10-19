@@ -36,7 +36,7 @@ jobs:
 
       - name: Create image ENV variable
         run: |
-          IMAGE=${{ github.repository_owner }}/spark-connect:${{ matrix.catalog }}${{ matrix.catalog_version }}-spark${{ matrix.spark_version }}-java${{ matrix.java_version }}-scala${{ matrix.scala_version }}
+          IMAGE=${{ github.repository_owner }}/spark-connect-server:${{ matrix.catalog }}${{ matrix.catalog_version }}-spark${{ matrix.spark_version }}-java${{ matrix.java_version }}-scala${{ matrix.scala_version }}
           echo "Building image: $IMAGE"
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 

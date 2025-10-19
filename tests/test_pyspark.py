@@ -29,9 +29,8 @@ def db_backend():
 
     tag = f"{catalog}{catalog_version}-spark{spark_version}-java{java_version}-scala{scala_version}"
 
-    image = docker_client.images.pull("franciscoabsampaio/spark-connect", tag=tag)
     container = docker_client.containers.run(
-        image,
+        image=f"franciscoabsampaio/spark-connect-server:{tag}",
         detach=True,
         ports={'15002/tcp': 15002}
     )
