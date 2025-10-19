@@ -56,6 +56,6 @@ jobs:
 
       - name: Test Docker image
         run: |
-          pip install -r requirements.txt
+          pip install -r tests/requirements.txt
           pip install pyspark==${{ matrix.spark_version }}
           pytest -vs tests/
