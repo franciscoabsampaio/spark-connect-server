@@ -1,13 +1,13 @@
 [
-  { "catalog": "delta", "catalog_version": "4.0.0", "java_version": "21", "spark_version": "4.0.1", "scala_version": "2.13" },
-  { "catalog": "delta", "catalog_version": "4.0.0", "java_version": "17", "spark_version": "4.0.1", "scala_version": "2.13" },
+  { "catalog": "delta", "catalog_version": "4.0.0", "java_version": "21", "spark_version": "4.0.0", "scala_version": "2.13" },
+  { "catalog": "delta", "catalog_version": "4.0.0", "java_version": "17", "spark_version": "4.0.0", "scala_version": "2.13" },
 
   { "catalog": "delta", "catalog_version": "3.3.2", "java_version": "17", "spark_version": "3.5.7", "scala_version": "2.12" },
 
   { "catalog": "delta", "catalog_version": "3.2.1", "java_version": "17", "spark_version": "3.5.7", "scala_version": "2.12" },
 
-  { "catalog": "iceberg", "catalog_version": "1.10.0", "java_version": "21", "spark_version": "4.0.1", "scala_version": "2.13" },
-  { "catalog": "iceberg", "catalog_version": "1.10.0", "java_version": "17", "spark_version": "4.0.1", "scala_version": "2.13" },
+  { "catalog": "iceberg", "catalog_version": "1.10.0", "java_version": "21", "spark_version": "4.0.0", "scala_version": "2.13" },
+  { "catalog": "iceberg", "catalog_version": "1.10.0", "java_version": "17", "spark_version": "4.0.0", "scala_version": "2.13" },
 
   { "catalog": "iceberg", "catalog_version": "1.10.0", "java_version": "17", "spark_version": "3.5.7", "scala_version": "2.12" },
   { "catalog": "iceberg", "catalog_version": "1.6.1", "java_version": "17", "spark_version": "3.5.7", "scala_version": "2.12" },
