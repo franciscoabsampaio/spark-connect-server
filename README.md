@@ -20,3 +20,11 @@ docker run -P franciscoabsampaio/spark-connect
 
 - **Delta:** initializes the Spark Connect server with a Delta catalog.
 - **Iceberg:** initializes the Spark Connect server with an Iceberg catalog.
+
+## Useful Links
+
+- [Spark versions](https://spark.apache.org/docs//).
+- [Delta versions](https://delta-docs-incubator.netlify.app/releases/).
+- [delta-spark versions](https://mvnrepository.com/artifact/io.delta/delta-spark).
+- [delta-storage versions](https://mvnrepository.com/artifact/io.delta/delta-storage).
+- [iceberg-spark-runtime-3.5](https://mvnrepository.com/artifact/org.apache.iceberg/iceberg-spark-runtime-3.5) (available from version 2.4).
