@@ -1,0 +1,50 @@
+ARG SPARK_VERSION
+ARG CATALOG_VERSION
+ARG SCALA_VERSION
+
+# Base image
+FROM apache/spark:${SPARK_VERSION}-scala${SCALA_VERSION}-java17-python3-r-ubuntu
+
+# Switch to root to install dependencies
+USER root
+
+# Download the Iceberg and Spark Connect JARs into the Spark jars directory
+RUN SPARK_VERSION_MAJOR=$(echo "${SPARK_VERSION}" | cut -d'.' -f1,2) && \
+    apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/* && \
+    # Spark Connect
+    wget https://repo1.maven.org/maven2/org/apache/spark/spark-connect_${SCALA_VERSION}/${SPARK_VERSION}/spark-connect_${SCALA_VERSION}-${SPARK_VERSION}.jar \
+      -P ${SPARK_HOME}/jars/ && \
+    # Iceberg core libraries
+    wget https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark-runtime-${SPARK_VERSION_MAJOR}_${SCALA_VERSION}/${CATALOG_VERSION}/iceberg-spark-runtime-${SPARK_VERSION_MAJOR}_${SCALA_VERSION}-${CATALOG_VERSION}.jar \
+      -P ${SPARK_HOME}/jars/
+
+# Ensure conf dir exists
+RUN mkdir -p ${SPARK_HOME}/conf
+
+# Write default configs for Iceberg
+RUN printf "%s\n" \
+      "spark.sql.extensions=org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions" \
+      "spark.sql.catalog.local=org.apache.iceberg.spark.SparkCatalog" \
+      "spark.sql.catalog.local.type=hadoop" \
+      "spark.sql.catalog.local.warehouse=/tmp/warehouse" \
+      "spark.sql.defaultCatalog=local" \
+      > ${SPARK_HOME}/conf/spark-defaults.conf && \
+    mkdir -p /tmp/warehouse && chown -R spark:spark /tmp/warehouse
+
+# Revert to the spark user
+USER spark
+
+WORKDIR /opt/spark
+
+# Copy entrypoint script and execute it
+COPY entrypoint.sh /opt/entrypoint.sh
+USER root
+RUN chmod +x /opt/entrypoint.sh
+USER spark
+
+# Spark Connect Server
+EXPOSE 15002/tcp
+# Spark UI
+EXPOSE 4040/tcp
+
+ENTRYPOINT ["/opt/entrypoint.sh"]

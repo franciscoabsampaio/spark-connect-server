@@ -1,0 +1,46 @@
+name: Build Iceberg Spark Images
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  load-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Load matrix JSON
+        id: set-matrix
+        run: |
+          MATRIX_JSON=$(cat VERSIONS.json)
+          echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
+
+  build:
+    needs: load-matrix
+    runs-on: ubuntu-latest
+    services:
+      docker:
+        image: docker:20.10.24-dind
+        options: --privileged
+
+    strategy:
+      matrix: ${{ fromJSON(needs.load-matrix.outputs.matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build ./${{ matrix.catalog }} \
+          --build-arg SPARK_VERSION=${{ matrix.spark_version }} \
+          --build-arg SCALA_VERSION=${{ matrix.scala_version }} \
+          --build-arg CATALOG_VERSION=${{ matrix.catalog_version }} \
+          -t ${{ github.repository_owner }}/spark-connect:${{ matrix.catalog }}_${{ matrix.catalog_version }}-spark_${{ matrix.spark_version }}-scala_${{ matrix.scala_version }}
+
+      - name: Test Docker image
+        run: |
+          docker run --rm ${{ github.repository_owner }}/spark-connect:${{ matrix.catalog }}_${{ matrix.catalog_version }}-spark_${{ matrix.spark_version }}-scala_${{ matrix.scala_version }} spark-submit --version
