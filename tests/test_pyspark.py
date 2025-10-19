@@ -43,7 +43,7 @@ def db_backend():
     container.stop()
 
 
-def test_delta_catalog_basic_write_read():
+def test_catalog_basic_write_read():
     spark = SparkSession.builder \
         .remote("sc://localhost:15002") \
         .getOrCreate()
