@@ -23,6 +23,7 @@ docker run -P franciscoabsampaio/spark-connect
 
 ## Useful Links
 
+- [Spark image tags](https://hub.docker.com/_/spark/tags).
 - [Spark versions](https://spark.apache.org/docs//).
 - [Delta versions](https://delta-docs-incubator.netlify.app/releases/).
 - [delta-spark versions](https://mvnrepository.com/artifact/io.delta/delta-spark).
