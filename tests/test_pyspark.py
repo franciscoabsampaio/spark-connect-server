@@ -48,7 +48,7 @@ def test_catalog_basic_write_read():
         .remote("sc://localhost:15002") \
         .getOrCreate()
 
-    table_name = f"{os.getenv("CATALOG")}_test_{uuid.uuid4().hex[:8]}"
+    table_name = f"{os.getenv('CATALOG')}_test_{uuid.uuid4().hex[:8]}"
     location = f"/tmp/{table_name}"  # Works in local fs or container /tmp
 
     # CREATE TABLE USING CATALOG
@@ -57,7 +57,7 @@ def test_catalog_basic_write_read():
             id INT,
             name STRING
         )
-        USING {os.getenv("CATALOG")}
+        USING {os.getenv('CATALOG')}
         LOCATION '{location}'
     """)
 
