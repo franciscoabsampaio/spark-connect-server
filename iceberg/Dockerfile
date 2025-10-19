@@ -4,7 +4,7 @@ ARG SCALA_VERSION
 ARG SPARK_VERSION
 
 # Base image
-FROM apache/spark:${SPARK_VERSION}-scala${SCALA_VERSION}-java${JAVA_VERSION}-ubuntu
+FROM spark:${SPARK_VERSION}-scala${SCALA_VERSION}-java${JAVA_VERSION}-ubuntu
 
 # Switch to root to install dependencies
 USER root

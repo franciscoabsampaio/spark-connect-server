@@ -36,6 +36,8 @@ jobs:
 
       - name: Build Docker image
         run: |
+          echo "Building image for catalog: ${{ matrix.catalog }}, version: ${{ matrix.catalog_version }}, spark: ${{ matrix.spark_version }}, scala: ${{ matrix.scala_version }}, java: ${{ matrix.java_version }}"
+
           docker build ./${{ matrix.catalog }} \
           --build-arg CATALOG_VERSION=${{ matrix.catalog_version }} \
           --build-arg JAVA_VERSION=${{ matrix.java_version }} \
