@@ -27,7 +27,8 @@ jobs:
         options: --privileged
 
     strategy:
-      matrix: ${{ fromJSON(needs.load-matrix.outputs.matrix) }}
+      matrix:
+        include: ${{ fromJSON(needs.load-matrix.outputs.matrix) }}
 
     steps:
       - name: Checkout
