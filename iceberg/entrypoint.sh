@@ -1,4 +1,6 @@
 #!/bin/bash
+SPARK_VERSION_MAJOR=$(echo "${SPARK_VERSION}" | cut -d'.' -f1,2)
+
 # Start Spark Connect Server
 /opt/spark/bin/spark-submit \
   --class org.apache.spark.sql.connect.service.SparkConnectServer \
