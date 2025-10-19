@@ -34,17 +34,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Create image ENV variable
+        run: |
+          IMAGE=${{ github.repository_owner }}/spark-connect:${{ matrix.catalog }}${{ matrix.catalog_version }}-spark${{ matrix.spark_version }}-java${{ matrix.java_version }}-scala${{ matrix.scala_version }}
+          echo "Building image: $IMAGE"
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
       - name: Build Docker image
         run: |
-          echo "Building image for catalog: ${{ matrix.catalog }}, version: ${{ matrix.catalog_version }}, spark: ${{ matrix.spark_version }}, scala: ${{ matrix.scala_version }}, java: ${{ matrix.java_version }}"
-
           docker build ./${{ matrix.catalog }} \
           --build-arg CATALOG_VERSION=${{ matrix.catalog_version }} \
           --build-arg JAVA_VERSION=${{ matrix.java_version }} \
           --build-arg SCALA_VERSION=${{ matrix.scala_version }} \
           --build-arg SPARK_VERSION=${{ matrix.spark_version }} \
-          -t ${{ github.repository_owner }}/spark-connect:${{ matrix.catalog }}${{ matrix.catalog_version }}-spark${{ matrix.spark_version }}-java${{ matrix.java_version }}-scala${{ matrix.scala_version }}
+          -t ${{ env.IMAGE }}
 
-      - name: Test Docker image
+      - name: Run Docker image
         run: |
-          docker run --rm -d ${{ github.repository_owner }}/spark-connect:${{ matrix.catalog }}${{ matrix.catalog_version }}-spark${{ matrix.spark_version }}-java${{ matrix.java_version }}-scala${{ matrix.scala_version }} spark-submit --version
+          CID=$(docker run --rm -d ${{ env.IMAGE }})
+          docker exec $CID spark-submit --version
