@@ -49,7 +49,12 @@ jobs:
           --build-arg SPARK_VERSION=${{ matrix.spark_version }} \
           -t ${{ env.IMAGE }}
 
-      - name: Run Docker image
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Test Docker image
         run: |
-          CID=$(docker run --rm -d ${{ env.IMAGE }})
-          docker exec $CID spark-submit --version
+          pip install pyspark==${{ matrix.spark_version }} docker>=7.1.0 pytest>=8.4.2
+          pytest -vs tests/
