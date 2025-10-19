@@ -4,7 +4,7 @@ This repository contains the necessary Dockerfiles and supplementary code for bu
 
 **It is not tested for production.**
 
-*Instead*, It was created in the context of the [Spark Connect client for Rust](https://github.com/franciscoabsampaio/spark-connect) and [Swellow](https://github.com/franciscoabsampaio/swellow) projects to facilitate testing and development, in easy, reproducible fashion!
+*Instead*, it was created in the context of the [Spark Connect client for Rust](https://github.com/franciscoabsampaio/spark-connect) and [Swellow](https://github.com/franciscoabsampaio/swellow) projects to facilitate testing and development, in easy, reproducible fashion!
 
 Feel free to use it. If you wish to productize it further, let me know!
 
