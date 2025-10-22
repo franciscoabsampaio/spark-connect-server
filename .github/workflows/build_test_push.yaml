@@ -2,7 +2,7 @@ name: Build Iceberg Spark Images
 
 on:
   push:
-    branches: [ main ]
+    branches: [ release ]
 
 jobs:
   load-matrix:
@@ -21,11 +21,16 @@ jobs:
   build:
     needs: load-matrix
     runs-on: ubuntu-latest
+    environment:
+      name: release
+    permissions:
+      contents: read # Required to checkout code
+      id-token: write # Required for OIDC signing (used by attestations)
+      packages: write # Required to push to Docker Hub
     services:
       docker:
         image: docker:20.10.24-dind
         options: --privileged
-
     strategy:
       matrix:
         include: ${{ fromJSON(needs.load-matrix.outputs.matrix) }}
@@ -84,6 +89,26 @@ jobs:
           docker tag "${{ env.IMAGE }}" "${IMAGE_BASE}:${{ matrix.catalog }}"
           docker images "${IMAGE_BASE}"
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
       - name: Push image with all tags
         run: |
           docker push --all-tags ${{ github.repository_owner }}/spark-connect-server
+
+      - name: Get image digest
+        id: digest
+        run: |
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ env.IMAGE }} | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+          echo "Digest: $DIGEST"
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: index.docker.io/${{ github.repository_owner }}/spark-connect-server
+          subject-digest: ${{ steps.digest.outputs.digest }}
+          push-to-registry: true
