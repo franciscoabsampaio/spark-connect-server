@@ -1,8 +1,10 @@
 name: Build Iceberg Spark Images
 
 on:
+  pull_request:
+    branches: [ release ]
   push:
-    branches: [ main ]
+    branches: [ release ]
 
 jobs:
   load-matrix:
@@ -18,14 +20,19 @@ jobs:
           MATRIX_JSON=$(jq -c . VERSIONS.json)
           echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
 
-  build:
+  build-test-push:
     needs: load-matrix
     runs-on: ubuntu-latest
+    environment:
+      name: release
+    permissions:
+      contents: read # Required to checkout code
+      id-token: write # Required for OIDC signing (used by attestations)
+      packages: write # Required to push to Docker Hub
     services:
       docker:
         image: docker:20.10.24-dind
         options: --privileged
-
     strategy:
       matrix:
         include: ${{ fromJSON(needs.load-matrix.outputs.matrix) }}
@@ -84,6 +91,31 @@ jobs:
           docker tag "${{ env.IMAGE }}" "${IMAGE_BASE}:${{ matrix.catalog }}"
           docker images "${IMAGE_BASE}"
 
+      # Only run the push steps on release branch pushes
+      - name: Log in to Docker Hub
+        if: github.event_name == 'push' && github.ref == 'refs/heads/release'
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
       - name: Push image with all tags
+        if: github.event_name == 'push' && github.ref == 'refs/heads/release'
         run: |
           docker push --all-tags ${{ github.repository_owner }}/spark-connect-server
+
+      - name: Get image digest
+        if: github.event_name == 'push' && github.ref == 'refs/heads/release'
+        id: digest
+        run: |
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ env.IMAGE }} | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+          echo "Digest: $DIGEST"
+
+      - name: Generate artifact attestation
+        if: github.event_name == 'push' && github.ref == 'refs/heads/release'
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: index.docker.io/${{ github.repository_owner }}/spark-connect-server
+          subject-digest: ${{ steps.digest.outputs.digest }}
+          push-to-registry: true
