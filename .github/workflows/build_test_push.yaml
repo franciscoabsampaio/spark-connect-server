@@ -58,10 +58,32 @@ jobs:
         run: |
           pip install -r tests/requirements.txt
           pip install pyspark==${{ matrix.spark_version }}
-          
+
           CATALOG=${{ matrix.catalog }} \
           CATALOG_VERSION=${{ matrix.catalog_version }} \
           JAVA_VERSION=${{ matrix.java_version }} \
           SCALA_VERSION=${{ matrix.scala_version }} \
           SPARK_VERSION=${{ matrix.spark_version }} \
             pytest -vs tests/
+
+      - name: Tag selected image as latest
+        if: >
+          (
+            matrix.java_version == '17' &&
+            matrix.spark_version == '3.5.7' &&
+            matrix.scala_version == '2.12'
+          ) && (
+            (matrix.catalog == 'delta' && matrix.catalog_version == '3.3.2') ||
+            (matrix.catalog == 'iceberg' && matrix.catalog_version == '1.6')
+          )
+        run: |
+          IMAGE_BASE=${{ github.repository_owner }}/spark-connect-server
+          
+          echo "Tagging ${{ env.IMAGE }} as ${{ matrix.catalog }}-latest and ${{ matrix.catalog }}"
+          docker tag "${{ env.IMAGE }}" "${IMAGE_BASE}:${{ matrix.catalog }}-latest"
+          docker tag "${{ env.IMAGE }}" "${IMAGE_BASE}:${{ matrix.catalog }}"
+          docker images "${IMAGE_BASE}"
+
+      - name: Push image with all tags
+        run: |
+          docker push --all-tags ${{ github.repository_owner }}/spark-connect-server
