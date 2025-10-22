@@ -32,9 +32,11 @@ RUN mkdir -p ${SPARK_HOME}/conf
 
 # Write default configs for Delta
 RUN printf "%s\n" \
-    "spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension" \
-    "spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog" \
-    > ${SPARK_HOME}/conf/spark-defaults.conf
+        "spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension" \
+        "spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog" \
+        "spark.sql.warehouse.dir=/tmp/warehouse" \
+    > ${SPARK_HOME}/conf/spark-defaults.conf && \
+    mkdir -p /tmp/warehouse && chown -R spark:spark /tmp/warehouse
 
 # Revert to the spark user
 USER spark

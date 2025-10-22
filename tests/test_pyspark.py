@@ -48,7 +48,6 @@ def test_catalog_basic_write_read(db_backend_url):
         .getOrCreate()
 
     table_name = f"test_{uuid.uuid4().hex[:8]}"
-    location = f"/tmp/{table_name}"  # Works in local fs or container /tmp
 
     # CREATE TABLE USING CATALOG
     spark.sql(f"""
@@ -57,7 +56,6 @@ def test_catalog_basic_write_read(db_backend_url):
             name STRING
         )
         USING {os.getenv('CATALOG')}
-        LOCATION '{location}'
     """)
 
     spark.sql(f"INSERT INTO {table_name} VALUES (1, 'bird'), (2, 'spark')")
