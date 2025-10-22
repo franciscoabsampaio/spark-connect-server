@@ -1,6 +1,8 @@
 name: Build Iceberg Spark Images
 
 on:
+  pull_request:
+    branches: [ release ]
   push:
     branches: [ release ]
 
@@ -18,7 +20,7 @@ jobs:
           MATRIX_JSON=$(jq -c . VERSIONS.json)
           echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
 
-  build:
+  build-test-push:
     needs: load-matrix
     runs-on: ubuntu-latest
     environment:
@@ -89,17 +91,21 @@ jobs:
           docker tag "${{ env.IMAGE }}" "${IMAGE_BASE}:${{ matrix.catalog }}"
           docker images "${IMAGE_BASE}"
 
+      # Only run the push steps on release branch pushes
       - name: Log in to Docker Hub
+        if: github.event_name == 'push' && github.ref == 'refs/heads/release'
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
         with:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push image with all tags
+        if: github.event_name == 'push' && github.ref == 'refs/heads/release'
         run: |
           docker push --all-tags ${{ github.repository_owner }}/spark-connect-server
 
       - name: Get image digest
+        if: github.event_name == 'push' && github.ref == 'refs/heads/release'
         id: digest
         run: |
           DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ env.IMAGE }} | cut -d'@' -f2)
@@ -107,6 +113,7 @@ jobs:
           echo "Digest: $DIGEST"
 
       - name: Generate artifact attestation
+        if: github.event_name == 'push' && github.ref == 'refs/heads/release'
         uses: actions/attest-build-provenance@v3
         with:
           subject-name: index.docker.io/${{ github.repository_owner }}/spark-connect-server
