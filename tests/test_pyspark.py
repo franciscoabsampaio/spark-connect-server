@@ -47,7 +47,7 @@ def test_catalog_basic_write_read(db_backend_url):
         .remote(db_backend_url) \
         .getOrCreate()
 
-    table_name = f"{os.getenv('CATALOG')}_test_{uuid.uuid4().hex[:8]}"
+    table_name = f"test_{uuid.uuid4().hex[:8]}"
     location = f"/tmp/{table_name}"  # Works in local fs or container /tmp
 
     # CREATE TABLE USING CATALOG

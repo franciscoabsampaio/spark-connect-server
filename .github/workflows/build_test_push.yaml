@@ -58,4 +58,10 @@ jobs:
         run: |
           pip install -r tests/requirements.txt
           pip install pyspark==${{ matrix.spark_version }}
-          pytest -vs tests/
+          
+          CATALOG=${{ matrix.catalog }} \
+          CATALOG_VERSION=${{ matrix.catalog_version }} \
+          JAVA_VERSION=${{ matrix.java_version }} \
+          SCALA_VERSION=${{ matrix.scala_version }} \
+          SPARK_VERSION=${{ matrix.spark_version }} \
+            pytest -vs tests/
