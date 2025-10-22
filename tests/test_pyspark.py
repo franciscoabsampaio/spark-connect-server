@@ -18,7 +18,7 @@ def wait_for_log(container, message, timeout=30):
 
 
 @pytest.fixture(scope="function")
-def db_backend():
+def db_backend_url():
     docker_client = docker.from_env()
 
     catalog = os.getenv("CATALOG")
@@ -42,9 +42,9 @@ def db_backend():
     container.stop()
 
 
-def test_catalog_basic_write_read():
+def test_catalog_basic_write_read(db_backend_url):
     spark = SparkSession.builder \
-        .remote("sc://localhost:15002") \
+        .remote(db_backend_url) \
         .getOrCreate()
 
     table_name = f"{os.getenv('CATALOG')}_test_{uuid.uuid4().hex[:8]}"
