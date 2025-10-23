@@ -29,6 +29,7 @@ jobs:
       contents: read # Required to checkout code
       id-token: write # Required for OIDC signing (used by attestations)
       packages: write # Required to push to Docker Hub
+      attestations: write # Required to attest build provenance
     services:
       docker:
         image: docker:20.10.24-dind
