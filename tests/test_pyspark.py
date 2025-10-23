@@ -34,7 +34,7 @@ def db_backend_url():
         detach=True,
         ports={'15002/tcp': 15002}
     )
-    wait_for_log(container, message="Spark Connect server started at:")
+    wait_for_log(container, message="Spark Connect server started")
     conn_url = "sc://localhost:15002"
 
     yield conn_url
