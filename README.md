@@ -1,31 +1,73 @@
 # Spark Connect Server
 
-This repository contains the necessary Dockerfiles and supplementary code for building images of Spark Connect servers.
+This repository contains the necessary Dockerfiles and supplementary code for building images of **Spark Connect servers**, with optional support for **Delta Lake** and **Apache Iceberg** catalogs.
 
-**It is not tested for production.**
+> **Note:** These images are intended for **development and testing** purposes — not production use.
 
-*Instead*, it was created in the context of the [Spark Connect client for Rust](https://github.com/franciscoabsampaio/spark-connect) and [Swellow](https://github.com/franciscoabsampaio/swellow) projects to facilitate testing and development, in easy, reproducible fashion!
+They were originally created to support the [`spark-connect`](https://github.com/franciscoabsampaio/spark-connect) (Rust client for Spark Connect) and [`Swellow`](https://github.com/franciscoabsampaio/swellow) projects, in an effort to achieve easy, **reproducible Spark environments** for integration testing, CI pipelines, and local development.
 
-Feel free to use it. If you wish to productize it further, let me know!
+If you find these useful and wish to make them production-ready, feel free to open a discussion or reach out!
 
-## Getting Started
+---
 
-```sh
-docker run -P franciscoabsampaio/spark-connect 
+## 🧭 Getting Started
+
+Run a Spark Connect server container:
+
+```bash
+docker run -P franciscoabsampaio/spark-connect-server
 ```
 
-`-P` will expose all configured ports (Spark UI and Spark Connect Server) in higher-level TCP ports.
+The `-P` flag automatically exposes all configured ports (including the Spark UI and Spark Connect server) on higher-level TCP ports.
 
-## Tags
+Once running, connect to it from PySpark or any Spark Connect client:
 
-- **Delta:** initializes the Spark Connect server with a Delta catalog.
-- **Iceberg:** initializes the Spark Connect server with an Iceberg catalog.
+```python
+from pyspark.sql import SparkSession
 
-## Useful Links
+spark = SparkSession.builder.remote("sc://localhost:15002").getOrCreate()
+df = spark.sql("SELECT 1 AS id")
+print(df.collect())
+```
 
-- [Spark image tags](https://hub.docker.com/_/spark/tags).
-- [Spark versions](https://spark.apache.org/docs//).
-- [Delta versions](https://delta-docs-incubator.netlify.app/releases/).
-- [delta-spark versions](https://mvnrepository.com/artifact/io.delta/delta-spark).
-- [delta-storage versions](https://mvnrepository.com/artifact/io.delta/delta-storage).
-- [iceberg-spark-runtime-3.5](https://mvnrepository.com/artifact/org.apache.iceberg/iceberg-spark-runtime-3.5) (available from version 2.4).
+---
+
+## 🏷️ Tags & Catalogs
+
+Available image tags:
+
+| Tag              | Description                              | Default Catalog              | Notes                        |
+| ---------------- | ---------------------------------------- | ---------------------------- | ---------------------------- |
+| `delta`          | Spark Connect server with Delta Lake     | Delta 3.3.2 / Spark 3.5.7    | Compatible with Java 17 |
+| `delta-latest`   | Latest tested Delta build                | Delta 4.0.0 / Spark 4.0.0    | Uses Java 21 + Scala 2.13    |
+| `iceberg`        | Spark Connect server with Apache Iceberg | Iceberg 1.6.1 / Spark 3.5.7  | Compatible with Java 17      |
+| `iceberg-latest` | Latest tested Iceberg build              | Iceberg 1.10.0 / Spark 4.0.0 | Uses Java 21 + Scala 2.13    |
+
+Each tag corresponds to a prebuilt environment combination of:
+
+* **Spark version**
+* **Scala version**
+* **Java version**
+* **Catalog (Delta / Iceberg)**
+* **Catalog version**
+
+These images ensure the correct set of JARs and environment variables are configured automatically, minimizing setup friction.
+
+> **Tip:** If you need to target a specific Spark or Java version, use one of the `Dockerfile`'s in the repository as a template for a custom build.
+
+---
+
+## 🔗 Useful Links
+
+* [Official Spark Docker image tags](https://hub.docker.com/_/spark/tags)
+* [Apache Spark releases](https://spark.apache.org/docs/)
+* [Delta Lake releases](https://delta-docs-incubator.netlify.app/releases/)
+* [delta-spark artifacts](https://mvnrepository.com/artifact/io.delta/delta-spark)
+* [delta-storage artifacts](https://mvnrepository.com/artifact/io.delta/delta-storage)
+* [Iceberg runtime (Spark 3.5)](https://mvnrepository.com/artifact/org.apache.iceberg/iceberg-spark-runtime-3.5)
+
+---
+
+© 2025 Francisco A. B. Sampaio. Licensed under the MIT License.
+
+This project is not affiliated with, endorsed by, or sponsored by the Apache Software Foundation.
