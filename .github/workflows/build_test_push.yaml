@@ -72,7 +72,7 @@ jobs:
           SPARK_VERSION=${{ matrix.spark_version }} \
             pytest -vs tests/
 
-      - name: Tag selected image as latest
+      - name: Tag selected image as catalog's default
         if: >
           (
             matrix.java_version == '17' &&
@@ -80,15 +80,25 @@ jobs:
             matrix.scala_version == '2.12'
           ) && (
             (matrix.catalog == 'delta' && matrix.catalog_version == '3.3.2') ||
-            (matrix.catalog == 'iceberg' && matrix.catalog_version == '1.6')
+            (matrix.catalog == 'iceberg' && matrix.catalog_version == '1.6.1')
           )
         run: |
           IMAGE_BASE=${{ github.repository_owner }}/spark-connect-server
-          
-          echo "Tagging ${{ env.IMAGE }} as ${{ matrix.catalog }}-latest and ${{ matrix.catalog }}"
-          docker tag "${{ env.IMAGE }}" "${IMAGE_BASE}:${{ matrix.catalog }}-latest"
           docker tag "${{ env.IMAGE }}" "${IMAGE_BASE}:${{ matrix.catalog }}"
-          docker images "${IMAGE_BASE}"
+
+      - name: Tag selected image as catalog's latest
+        if: >
+          (
+            matrix.java_version == '21' &&
+            matrix.spark_version == '4.0.0' &&
+            matrix.scala_version == '2.13'
+          ) && (
+            (matrix.catalog == 'delta' && matrix.catalog_version == '4.0.0') ||
+            (matrix.catalog == 'iceberg' && matrix.catalog_version == '1.10.0')
+          )
+        run: |
+          IMAGE_BASE=${{ github.repository_owner }}/spark-connect-server
+          docker tag "${{ env.IMAGE }}" "${IMAGE_BASE}:${{ matrix.catalog }}-latest"
 
       # Only run the push steps on release branch pushes
       - name: Log in to Docker Hub
