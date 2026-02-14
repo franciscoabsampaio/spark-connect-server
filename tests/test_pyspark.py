@@ -43,8 +43,8 @@ def db_backend_url():
 
 
 def qualified_name(catalog, schema, table):
-    if catalog == 'iceberg':
-        return f"spark_catalog.{schema}.{table}"
+    # if catalog == 'iceberg':
+    #     return f"spark_catalog.{schema}.{table}"
     return f"{schema}.{table}"
 
 
