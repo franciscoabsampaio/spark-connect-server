@@ -57,23 +57,25 @@ def test_catalog_basic_write_read(db_backend_url):
     schema = "default"
     table_name = f"test_{uuid.uuid4().hex[:8]}"
 
+    full_name = qualified_name(catalog, schema, table_name)
+
     # CREATE TABLE USING CATALOG
     spark.sql(f"""
-        CREATE TABLE {qualified_name(catalog, schema, table_name)} (
+        CREATE TABLE {full_name} (
             id INT,
             name STRING
         )
         USING {catalog}
     """)
 
-    spark.sql(f"INSERT INTO {table_name} VALUES (1, 'bird'), (2, 'spark')")
+    spark.sql(f"INSERT INTO {full_name} VALUES (1, 'bird'), (2, 'spark')")
 
-    df = spark.sql(f"SELECT * FROM {table_name} ORDER BY id")
+    df = spark.sql(f"SELECT * FROM {full_name} ORDER BY id")
     rows = df.collect()
 
     assert len(rows) == 2
     assert rows[0]["id"] == 1
     assert rows[0]["name"] == "bird"
 
-    spark.sql(f"DROP TABLE {table_name}")
+    spark.sql(f"DROP TABLE {full_name}")
     spark.stop()
