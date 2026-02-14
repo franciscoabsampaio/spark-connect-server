@@ -39,7 +39,7 @@ RUN printf "%s\n" \
         "spark.sql.catalog.local=org.apache.iceberg.spark.SparkCatalog" \
         "spark.sql.catalog.local.type=hive" \
         "spark.sql.catalog.local.warehouse=/tmp/warehouse" \
-        "spark.sql.defaultCatalog=local" \
+        "spark.sql.defaultCatalog=hive" \
     > ${SPARK_HOME}/conf/spark-defaults.conf && \
     mkdir -p /tmp/warehouse && chown -R spark:spark /tmp/warehouse
 
