@@ -47,11 +47,15 @@ def test_catalog_basic_write_read(db_backend_url):
         .remote(db_backend_url) \
         .getOrCreate()
 
+    catalog = os.getenv("CATALOG", "spark_catalog")
+    schema = "default"
     table_name = f"test_{uuid.uuid4().hex[:8]}"
+    
+    full_name = f"{catalog}.{schema}.{table_name}"
 
     # CREATE TABLE USING CATALOG
     spark.sql(f"""
-        CREATE TABLE {table_name} (
+        CREATE TABLE {full_name} (
             id INT,
             name STRING
         )
