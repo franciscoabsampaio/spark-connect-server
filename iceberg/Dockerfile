@@ -37,9 +37,9 @@ RUN mkdir -p ${SPARK_HOME}/conf
 RUN printf "%s\n" \
         "spark.sql.extensions=org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions" \
         "spark.sql.catalog.local=org.apache.iceberg.spark.SparkCatalog" \
-        "spark.sql.catalog.local.type=hive" \
+        "spark.sql.catalog.local.type=hadoop" \
         "spark.sql.catalog.local.warehouse=/tmp/warehouse" \
-        "spark.sql.defaultCatalog=hive" \
+        "spark.sql.defaultCatalog=local" \
     > ${SPARK_HOME}/conf/spark-defaults.conf && \
     mkdir -p /tmp/warehouse && chown -R spark:spark /tmp/warehouse
 

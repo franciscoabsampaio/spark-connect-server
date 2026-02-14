@@ -4,8 +4,6 @@
 
 This repository contains the necessary Dockerfiles and supplementary code for building images of **Spark Connect servers**, with optional support for **Delta Lake** and **Apache Iceberg** catalogs.
 
-> These images use [**hive**](https://hive.apache.org/) as the default metastore.
-
 > **Note:** These images are intended for **development and testing** purposes — not production use.
 
 They were originally created to support the [`spark-connect`](https://github.com/franciscoabsampaio/spark-connect) (Rust client for Spark Connect) and [`Swellow`](https://github.com/franciscoabsampaio/swellow) projects, in an effort to achieve easy, **reproducible Spark environments** for integration testing, CI pipelines, and local development.
