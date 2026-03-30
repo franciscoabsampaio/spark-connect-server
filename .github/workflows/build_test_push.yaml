@@ -1,4 +1,4 @@
-name: Build Iceberg Spark Images
+name: Build Spark Images
 
 on:
   push:
@@ -12,11 +12,48 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Load matrix JSON
+      - name: Validate defaults
+        run: |
+          jq -e '
+            group_by(.catalog)
+            | all(
+                ([ .[] | select(.default == true) ] | length) == 1
+              )
+          ' VERSIONS.json > /dev/null || {
+            echo "Each catalog must have exactly one entry with default=true"
+            exit 1
+          }
+      - name: Load matrix JSON and infer latest
         id: set-matrix
         run: |
-          MATRIX_JSON=$(jq -c . VERSIONS.json)
-          echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
+          MATRIX_JSON=$(jq -c '
+            def semver:
+              split(".") | map(tonumber);
+
+            def rank:
+              [
+                (.spark_version | semver[]),
+                (.catalog_version | semver[]),
+                (.scala_version | semver[]),
+                (.java_version | tonumber)
+              ];
+
+            . as $all
+            | map(
+                . as $row
+                | $row + {
+                    default: (.default // false),
+                    latest: (
+                      $row == (
+                        [ $all[] | select(.catalog == $row.catalog) ]
+                        | max_by(rank)
+                      )
+                    )
+                  }
+              )
+          ' VERSIONS.json)
+
+          echo "matrix=$MATRIX_JSON" >> "$GITHUB_OUTPUT"
 
   build-test-push:
     needs: load-matrix
@@ -42,18 +79,18 @@ jobs:
 
       - name: Create image ENV variable
         run: |
-          IMAGE=${{ github.repository_owner }}/spark-connect-server:${{ matrix.catalog }}${{ matrix.catalog_version }}-spark${{ matrix.spark_version }}-java${{ matrix.java_version }}-scala${{ matrix.scala_version }}
+          IMAGE=${{ github.repository_owner }}/spark-connect-server:${{ matrix.catalog }}-${{ matrix.catalog_version }}-spark${{ matrix.spark_version }}-java${{ matrix.java_version }}-scala${{ matrix.scala_version }}
           echo "Building image: $IMAGE"
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
       - name: Build Docker image
         run: |
           docker build ./${{ matrix.catalog }} \
-          --build-arg CATALOG_VERSION=${{ matrix.catalog_version }} \
-          --build-arg JAVA_VERSION=${{ matrix.java_version }} \
-          --build-arg SCALA_VERSION=${{ matrix.scala_version }} \
-          --build-arg SPARK_VERSION=${{ matrix.spark_version }} \
-          -t ${{ env.IMAGE }}
+            --build-arg CATALOG_VERSION=${{ matrix.catalog_version }} \
+            --build-arg JAVA_VERSION=${{ matrix.java_version }} \
+            --build-arg SCALA_VERSION=${{ matrix.scala_version }} \
+            --build-arg SPARK_VERSION=${{ matrix.spark_version }} \
+            -t "${{ env.IMAGE }}"
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -73,36 +110,19 @@ jobs:
             pytest -vs tests/
 
       - name: Tag selected image as catalog's default
-        if: >
-          (
-            matrix.java_version == '17' &&
-            matrix.spark_version == '3.5.7' &&
-            matrix.scala_version == '2.12'
-          ) && (
-            (matrix.catalog == 'delta' && matrix.catalog_version == '3.3.2') ||
-            (matrix.catalog == 'iceberg' && matrix.catalog_version == '1.6.1')
-          )
+        if: ${{ matrix.default }}
         run: |
           IMAGE_BASE=${{ github.repository_owner }}/spark-connect-server
           docker tag "${{ env.IMAGE }}" "${IMAGE_BASE}:${{ matrix.catalog }}"
 
       - name: Tag selected image as catalog's latest
-        if: >
-          (
-            matrix.java_version == '21' &&
-            matrix.spark_version == '4.0.0' &&
-            matrix.scala_version == '2.13'
-          ) && (
-            (matrix.catalog == 'delta' && matrix.catalog_version == '4.0.0') ||
-            (matrix.catalog == 'iceberg' && matrix.catalog_version == '1.10.0')
-          )
+        if: ${{ matrix.latest }}
         run: |
           IMAGE_BASE=${{ github.repository_owner }}/spark-connect-server
           docker tag "${{ env.IMAGE }}" "${IMAGE_BASE}:${{ matrix.catalog }}-latest"
 
-      # Only run the push steps on release branch pushes
       - name: Log in to Docker Hub
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        uses: docker/login-action@v3
         with:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -114,8 +134,8 @@ jobs:
       - name: Get image digest
         id: digest
         run: |
-          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ env.IMAGE }} | cut -d'@' -f2)
-          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "${{ env.IMAGE }}" | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
           echo "Digest: $DIGEST"
 
       - name: Generate artifact attestation
