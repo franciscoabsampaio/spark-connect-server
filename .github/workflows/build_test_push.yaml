@@ -1,4 +1,4 @@
-name: Build Iceberg Spark Images
+name: Build Spark Images
 
 on:
   push:
