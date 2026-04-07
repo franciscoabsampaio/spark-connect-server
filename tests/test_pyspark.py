@@ -53,6 +53,7 @@ def db_backend_url(image_name):
 
     container = docker_client.containers.run(
         image=image_name,
+        pull_policy="never",  # Prevent errors where old versions are being pulled
         detach=True,
         ports={'15002/tcp': 15002}
     )
@@ -105,6 +106,7 @@ def db_backend_url_ssl(image_name, tmp_path):
 
     container = docker_client.containers.run(
         image=image_name,
+        pull_policy="never",  # Prevent errors where old versions are being pulled
         detach=True,
         ports={'15002/tcp': 15002},
         environment={"USE_SSL": "true"},
