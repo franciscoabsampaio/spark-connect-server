@@ -1,4 +1,4 @@
-FROM base AS iceberg
+FROM spark-base AS iceberg
 
 USER root
 
@@ -17,11 +17,3 @@ RUN printf "%s\n" \
     > ${SPARK_HOME}/conf/spark-defaults.conf
 
 USER spark
-
-# Copy entrypoint script and make it executable
-COPY entrypoint.sh /opt/entrypoint.sh
-USER root
-RUN chmod +x /opt/entrypoint.sh
-USER spark
-
-ENTRYPOINT ["/opt/entrypoint.sh"]
