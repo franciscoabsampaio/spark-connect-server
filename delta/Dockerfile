@@ -1,58 +1,27 @@
-ARG CATALOG_VERSION
-ARG JAVA_VERSION
-ARG SCALA_VERSION
-ARG SPARK_VERSION
+FROM base AS delta
 
-# Base image
-FROM spark:${SPARK_VERSION}-scala${SCALA_VERSION}-java${JAVA_VERSION}-ubuntu
-
-ARG CATALOG_VERSION
-ARG JAVA_VERSION
-ARG SCALA_VERSION
-ARG SPARK_VERSION
-
-# Expose build arguments as environment variables to the entrypoint script
-ENV CATALOG_VERSION=${CATALOG_VERSION}
-ENV JAVA_VERSION=${JAVA_VERSION}
-ENV SCALA_VERSION=${SCALA_VERSION}
-ENV SPARK_VERSION=${SPARK_VERSION}
-
-# Switch to root to install dependencies
 USER root
 
 # Download the Delta Lake JARs directly into Spark's jars directory
 # This avoids the need for the --packages argument at runtime.
-RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/* && \
-    wget https://repo1.maven.org/maven2/io/delta/delta-spark_${SCALA_VERSION}/${CATALOG_VERSION}/delta-spark_${SCALA_VERSION}-${CATALOG_VERSION}.jar -P ${SPARK_HOME}/jars/ && \
-    wget https://repo1.maven.org/maven2/io/delta/delta-storage/${CATALOG_VERSION}/delta-storage-${CATALOG_VERSION}.jar -P ${SPARK_HOME}/jars/ && \
-    wget https://repo1.maven.org/maven2/org/apache/spark/spark-connect_${SCALA_VERSION}/${SPARK_VERSION}/spark-connect_${SCALA_VERSION}-${SPARK_VERSION}.jar -P ${SPARK_HOME}/jars/
-
-# Ensure conf dir exists
-RUN mkdir -p ${SPARK_HOME}/conf
+RUN wget https://repo1.maven.org/maven2/io/delta/delta-spark_${SCALA_VERSION}/${CATALOG_VERSION}/delta-spark_${SCALA_VERSION}-${CATALOG_VERSION}.jar \
+    -P ${SPARK_HOME}/jars/ && \
+    wget https://repo1.maven.org/maven2/io/delta/delta-storage/${CATALOG_VERSION}/delta-storage-${CATALOG_VERSION}.jar \
+    -P ${SPARK_HOME}/jars/
 
 # Write default configs for Delta
 RUN printf "%s\n" \
         "spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension" \
         "spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog" \
         "spark.sql.warehouse.dir=/tmp/warehouse" \
-    > ${SPARK_HOME}/conf/spark-defaults.conf && \
-    mkdir -p /tmp/warehouse && chown -R spark:spark /tmp/warehouse
+    > ${SPARK_HOME}/conf/spark-defaults.conf
 
-# Revert to the spark user
 USER spark
 
-# Set working directory to /opt/spark
-WORKDIR /opt/spark
-
-# Copy entrypoint script and execute it
+# Copy entrypoint script and make it executable
 COPY entrypoint.sh /opt/entrypoint.sh
 USER root
 RUN chmod +x /opt/entrypoint.sh
 USER spark
-
-# SparkUI
-EXPOSE 15002/tcp
-# Spark Connect Server
-EXPOSE 4040/tcp
 
 ENTRYPOINT ["/opt/entrypoint.sh"]
