@@ -9,7 +9,14 @@ import uuid
 def wait_for_log(container, message, timeout=30):
     start = time.time()
     while True:
+        # Refresh the container object from the Docker daemon
+        container.reload()
         logs = container.logs().decode("utf-8")
+        
+        # Check if the container is still running
+        if container.status == "exited":
+            raise RuntimeError(f"Container crashed prematurely!\nContainer Logs:\n{logs}")
+
         if message in logs:
             return
         if time.time() - start > timeout:
@@ -26,22 +33,26 @@ def wait_for_cert(cert_path, timeout=30):
 
 
 @pytest.fixture
-def tag():
-    catalog = os.getenv("CATALOG")
+def image_name():
+    if os.getenv("SPARK_CONNECT_SERVER_LOCAL"):
+        return "delta-local"
+    
+    catalog = os.getenv("CATALOG", "delta")
     catalog_version = os.getenv("CATALOG_VERSION")
     spark_version = os.getenv("SPARK_VERSION")
     scala_version = os.getenv("SCALA_VERSION")
     java_version = os.getenv("JAVA_VERSION")
 
-    return f"{catalog}{catalog_version}-spark{spark_version}-java{java_version}-scala{scala_version}"
+    tag = f"{catalog}{catalog_version}-spark{spark_version}-java{java_version}-scala{scala_version}"
+    return f"franciscoabsampaio/spark-connect-server:{tag}"
 
 
 @pytest.fixture(scope="function")
-def db_backend_url(tag):
+def db_backend_url(image_name):
     docker_client = docker.from_env()
 
     container = docker_client.containers.run(
-        image=f"franciscoabsampaio/spark-connect-server:{tag}",
+        image=image_name,
         detach=True,
         ports={'15002/tcp': 15002}
     )
@@ -53,18 +64,12 @@ def db_backend_url(tag):
     container.stop()
 
 
-def qualified_name(catalog, schema, table):
-    # if catalog == 'iceberg':
-    #     return f"spark_catalog.{schema}.{table}"
-    return f"{schema}.{table}"
-
-
 def test_catalog_basic_write_read(db_backend_url):
     spark = SparkSession.builder \
         .remote(db_backend_url) \
         .getOrCreate()
 
-    catalog = os.getenv("CATALOG")
+    catalog = os.getenv("CATALOG", "delta")
     table_name = f"test_{uuid.uuid4().hex[:8]}"
 
     # CREATE TABLE USING CATALOG
@@ -90,14 +95,16 @@ def test_catalog_basic_write_read(db_backend_url):
 
 
 @pytest.fixture(scope="function")
-def db_backend_url_ssl(tag, tmp_path):
+def db_backend_url_ssl(image_name, tmp_path):
     docker_client = docker.from_env()
 
     ssl_dir = tmp_path / "ssl"
     ssl_dir.mkdir()
+    # Make the host folder writable by any user inside the container
+    ssl_dir.chmod(0o777)
 
     container = docker_client.containers.run(
-        image=f"franciscoabsampaio/spark-connect-server:{tag}",
+        image=image_name,
         detach=True,
         ports={'15002/tcp': 15002},
         environment={"USE_SSL": "true"},
@@ -110,19 +117,24 @@ def db_backend_url_ssl(tag, tmp_path):
     cert_path = ssl_dir / "spark.crt"
     wait_for_cert(cert_path)
 
-    yield f"sc://localhost:15002;use_ssl=true;ssl_trustCertCollectionFile={cert_path}"
+    # from urllib.parse import quote
+    # encoded_cert_path = quote(str(cert_path))
+    # "ssl_trustCertCollectionFile={encoded_cert_path}"
+    yield cert_path, f"sc://localhost:15002"
 
     container.stop()
 
 
 def test_catalog_basic_write_read_ssl(db_backend_url_ssl):
-    conn_url = db_backend_url_ssl
-
+    cert_path, connection_url = db_backend_url_ssl
+    
     spark = SparkSession.builder \
-        .remote(conn_url) \
+        .remote(connection_url) \
+        .config("spark.connect.grpc.ssl.enabled", "true") \
+        .config("spark.connect.grpc.ssl.trustCertCollectionFile", cert_path) \
         .getOrCreate()
 
-    catalog = os.getenv("CATALOG")
+    catalog = os.getenv("CATALOG", "delta")
     table_name = f"test_{uuid.uuid4().hex[:8]}"
 
     spark.sql(f"""
@@ -143,4 +155,3 @@ def test_catalog_basic_write_read_ssl(db_backend_url_ssl):
     assert rows[0]["name"] == "bird"
 
     spark.sql(f"DROP TABLE {table_name}")
-    spark.stop()

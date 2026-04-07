@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Setup SSL if enabled
-source ${SPARK_HOME}/setup_ssl.sh
+source /opt/setup_ssl.sh
 
 # Set catalog JARs based on the catalog type
 if [ ${CATALOG} == delta ]; then
