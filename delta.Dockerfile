@@ -1,5 +1,7 @@
 FROM spark-base AS delta
 
+ENV CATALOG=delta
+
 USER root
 
 # Download the Delta Lake JARs directly into Spark's jars directory

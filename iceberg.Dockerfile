@@ -1,5 +1,7 @@
 FROM spark-base AS iceberg
 
+ENV CATALOG=iceberg
+
 USER root
 
 # Download the Iceberg jar into the Spark jars directory

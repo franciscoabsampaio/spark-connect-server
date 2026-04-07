@@ -64,12 +64,6 @@ def db_backend_url(image_name):
     container.stop()
 
 
-def qualified_name(catalog, schema, table):
-    # if catalog == 'iceberg':
-    #     return f"spark_catalog.{schema}.{table}"
-    return f"{schema}.{table}"
-
-
 def test_catalog_basic_write_read(db_backend_url):
     spark = SparkSession.builder \
         .remote(db_backend_url) \
@@ -123,16 +117,21 @@ def db_backend_url_ssl(image_name, tmp_path):
     cert_path = ssl_dir / "spark.crt"
     wait_for_cert(cert_path)
 
-    yield f"sc://localhost:15002;use_ssl=true;ssl_trustCertCollectionFile={cert_path}"
+    # from urllib.parse import quote
+    # encoded_cert_path = quote(str(cert_path))
+    # "ssl_trustCertCollectionFile={encoded_cert_path}"
+    yield cert_path, f"sc://localhost:15002"
 
     container.stop()
 
 
 def test_catalog_basic_write_read_ssl(db_backend_url_ssl):
-    conn_url = db_backend_url_ssl
-
+    cert_path, connection_url = db_backend_url_ssl
+    
     spark = SparkSession.builder \
-        .remote(conn_url) \
+        .remote(connection_url) \
+        .config("spark.connect.grpc.ssl.enabled", "true") \
+        .config("spark.connect.grpc.ssl.trustCertCollectionFile", cert_path) \
         .getOrCreate()
 
     catalog = os.getenv("CATALOG", "delta")
@@ -156,4 +155,3 @@ def test_catalog_basic_write_read_ssl(db_backend_url_ssl):
     assert rows[0]["name"] == "bird"
 
     spark.sql(f"DROP TABLE {table_name}")
-    spark.stop()
