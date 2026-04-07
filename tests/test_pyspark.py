@@ -108,7 +108,7 @@ def db_backend_url_ssl(image_name, tmp_path):
         detach=True,
         ports={'15002/tcp': 15002},
         environment={"USE_SSL": "true"},
-        volumes={str(ssl_dir): {"bind": "/opt/spark/conf/ssl", "mode": "rw"}},
+        volumes={str(ssl_dir): {"bind": "/opt/conf/ssl", "mode": "rw"}},
     )
 
     wait_for_log(container, message="Spark Connect server started")

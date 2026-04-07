@@ -25,10 +25,10 @@ RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 RUN wget https://repo1.maven.org/maven2/org/apache/spark/spark-connect_${SCALA_VERSION}/${SPARK_VERSION}/spark-connect_${SCALA_VERSION}-${SPARK_VERSION}.jar \
     -P ${SPARK_HOME}/jars/
 
-RUN mkdir -p ${SPARK_HOME}/conf && \
-    mkdir -p ${SPARK_HOME}/conf/ssl && \
+RUN mkdir -p /opt/conf && \
+    mkdir -p /opt/conf/ssl && \
     mkdir -p /tmp/warehouse && \
-    chown -R spark:spark ${SPARK_HOME}/conf/ssl /tmp/warehouse
+    chown -R spark:spark /opt/conf/ssl /tmp/warehouse
 
 # Copy scripts and make them executable
 COPY scripts/setup_ssl.sh /opt/setup_ssl.sh
