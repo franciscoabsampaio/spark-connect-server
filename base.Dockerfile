@@ -31,9 +31,9 @@ RUN mkdir -p ${SPARK_HOME}/conf && \
     chown -R spark:spark ${SPARK_HOME}/conf/ssl /tmp/warehouse
 
 # Copy scripts and make them executable
-COPY scripts/setup_ssl.sh /opt/scripts/setup_ssl.sh
+COPY scripts/setup_ssl.sh /opt/setup_ssl.sh
 COPY scripts/entrypoint.sh /opt/entrypoint.sh
-RUN chmod +x /opt/scripts/setup_ssl.sh /opt/entrypoint.sh
+RUN chmod +x /opt/setup_ssl.sh /opt/entrypoint.sh
 
 USER spark
 WORKDIR /opt/spark
