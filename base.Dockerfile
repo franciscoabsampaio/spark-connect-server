@@ -18,6 +18,7 @@ ENV USE_SSL=false
 
 USER root
 
+# Install wget and remove apt cache
 RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 
 # Download Spark Connect JAR (common to all catalogs)
@@ -29,11 +30,15 @@ RUN mkdir -p ${SPARK_HOME}/conf && \
     mkdir -p /tmp/warehouse && \
     chown -R spark:spark ${SPARK_HOME}/conf/ssl /tmp/warehouse
 
+# Copy scripts and make them executable
 COPY scripts/setup_ssl.sh /opt/scripts/setup_ssl.sh
-RUN chmod +x /opt/scripts/setup_ssl.sh
+COPY scripts/entrypoint.sh /opt/entrypoint.sh
+RUN chmod +x /opt/scripts/setup_ssl.sh /opt/entrypoint.sh
 
 USER spark
 WORKDIR /opt/spark
 
 EXPOSE 15002/tcp
 EXPOSE 4040/tcp
+
+ENTRYPOINT ["/opt/entrypoint.sh"]

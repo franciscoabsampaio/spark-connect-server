@@ -92,7 +92,7 @@ jobs:
             --build-arg SPARK_VERSION=${{ matrix.spark_version }} \
             -t spark-base .
 
-          docker build ./${{ matrix.catalog }} \
+          docker build -f ${{ matrix.catalog }}.Dockerfile \
             -t "${{ env.IMAGE }}"
 
       - name: Setup Python
