@@ -65,10 +65,6 @@ jobs:
       id-token: write # Required for OIDC signing (used by attestations)
       packages: write # Required to push to Docker Hub
       attestations: write # Required to attest build provenance
-    services:
-      docker:
-        image: docker:20.10.24-dind
-        options: --privileged
     strategy:
       matrix:
         include: ${{ fromJSON(needs.load-matrix.outputs.matrix) }}
