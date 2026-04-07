@@ -4,8 +4,8 @@ set -euo pipefail
 SSL_ARGS=""
 
 if [ "${USE_SSL:-false}" = "true" ]; then
-    KEYSTORE="/opt/conf/ssl/keystore.jks"
-    CERT="/opt/conf/ssl/spark.crt"
+    KEYSTORE="/opt/ssl/keystore.jks"
+    CERT="/opt/ssl/spark.crt"
     STOREPASS="${SSL_KEYSTORE_PASSWORD:-changeit}"
 
     # Generate keystore if it doesn't exist (e.g. not mounted as a volume)
