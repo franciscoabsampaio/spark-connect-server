@@ -85,6 +85,8 @@ jobs:
 
       - name: Build Docker image
         run: |
+          docker build -f base.Dockerfile -t spark-base .
+
           docker build ./${{ matrix.catalog }} \
             --build-arg CATALOG_VERSION=${{ matrix.catalog_version }} \
             --build-arg JAVA_VERSION=${{ matrix.java_version }} \
