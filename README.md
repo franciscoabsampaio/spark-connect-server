@@ -38,14 +38,14 @@ print(df.collect())
 
 Containers can also be run with SSL enabled, by setting the environment variable `USE_SSL=true` and either mounting the certificate and key store on the container, on the following paths:
 
-- **Key Store:** `/opt/conf/ssl/keystore.jks`
-- **Certificate:** `/opt/conf/ssl/spark.crt`
+- **Key Store:** `/opt/ssl/keystore.jks`
+- **Certificate:** `/opt/ssl/spark.crt`
 
 ```bash
 docker run \
     -e USE_SSL=true \
-    -v $PATH_TO_MY_KEYSTORE="/opt/conf/ssl/keystore.jks":ro \
-    -v $PATH_TO_MY_CERT="/opt/conf/ssl/spark.crt":ro \
+    -v $PATH_TO_MY_KEYSTORE="/opt/ssl/keystore.jks":ro \
+    -v $PATH_TO_MY_CERT="/opt/ssl/spark.crt":ro \
     -P franciscoabsampaio/spark-connect-server:delta
 ```
 
@@ -54,7 +54,7 @@ or letting the container generate a self-signed certificate, accessible through 
 ```bash
 docker run \
     -e USE_SSL=true \
-    -v $PATH_TO_MY_CERT="/opt/conf/ssl/spark.crt" \
+    -v $PATH_TO_MY_CERT="/opt/ssl/spark.crt" \
     -P franciscoabsampaio/spark-connect-server:delta
 ```
 

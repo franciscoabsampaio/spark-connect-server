@@ -25,15 +25,15 @@ RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 RUN wget https://repo1.maven.org/maven2/org/apache/spark/spark-connect_${SCALA_VERSION}/${SPARK_VERSION}/spark-connect_${SCALA_VERSION}-${SPARK_VERSION}.jar \
     -P ${SPARK_HOME}/jars/
 
-RUN mkdir -p /opt/conf && \
-    mkdir -p /opt/conf/ssl && \
+RUN mkdir -p ${SPARK_HOME}/conf && \
+    mkdir -p /opt/ssl && \
     mkdir -p /tmp/warehouse && \
-    chown -R spark:spark /opt/conf/ssl /tmp/warehouse
+    chown -R spark:spark /opt/ssl /tmp/warehouse
 
 # Copy scripts and make them executable
-COPY scripts/setup_ssl.sh /opt/setup_ssl.sh
-COPY scripts/entrypoint.sh /opt/entrypoint.sh
-RUN chmod +x /opt/setup_ssl.sh /opt/entrypoint.sh
+COPY scripts/setup_ssl.sh ${SPARK_HOME}/setup_ssl.sh
+COPY scripts/entrypoint.sh ${SPARK_HOME}/entrypoint.sh
+RUN chmod +x ${SPARK_HOME}/setup_ssl.sh ${SPARK_HOME}/entrypoint.sh
 
 USER spark
 WORKDIR ${SPARK_HOME}
@@ -41,4 +41,4 @@ WORKDIR ${SPARK_HOME}
 EXPOSE 15002/tcp
 EXPOSE 4040/tcp
 
-ENTRYPOINT ["/opt/entrypoint.sh"]
+ENTRYPOINT ["sh", "-c", "$SPARK_HOME/entrypoint.sh"]
