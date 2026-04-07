@@ -1,7 +1,9 @@
 import docker
-import pytest
-from pyspark.sql import SparkSession
 import os
+from pathlib import Path
+from pyspark.sql import SparkSession
+import pytest
+import shutil
 import time
 import uuid
 
@@ -98,8 +100,8 @@ def test_catalog_basic_write_read(db_backend_url):
 def db_backend_url_ssl(image_name, tmp_path):
     docker_client = docker.from_env()
 
-    ssl_dir = tmp_path / "ssl"
-    ssl_dir.mkdir()
+    ssl_dir = Path.cwd() / "test_ssl_certs" / uuid.uuid4().hex
+    ssl_dir.mkdir(parents=True, exist_ok=True)
     # Make the host folder writable by any user inside the container
     ssl_dir.chmod(0o777)
 
@@ -122,7 +124,10 @@ def db_backend_url_ssl(image_name, tmp_path):
     # "ssl_trustCertCollectionFile={encoded_cert_path}"
     yield cert_path, f"sc://localhost:15002"
 
-    container.stop()
+    container.stop()    
+
+    # Cleanup the workspace folder after the test is done
+    shutil.rmtree(ssl_dir, ignore_errors=True)
 
 
 def test_catalog_basic_write_read_ssl(db_backend_url_ssl):
