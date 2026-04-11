@@ -65,8 +65,6 @@ from pyspark.sql import SparkSession
 
 spark = SparkSession.builder \
     .remote("sc://localhost:15002") \
-    .config("spark.connect.grpc.ssl.enabled", "true") \
-    .config("spark.connect.grpc.ssl.trustCertCollectionFile", path_to_my_cert) \
     .getOrCreate()
 
 df = spark.sql("SELECT 1 AS id")
