@@ -58,20 +58,6 @@ docker run \
     -P franciscoabsampaio/spark-connect-server:delta
 ```
 
-Then specify the certificate when instantiating the Spark session:
-
-```python
-from pyspark.sql import SparkSession
-
-spark = SparkSession.builder \
-    .remote("sc://localhost:15002") \
-    .getOrCreate()
-
-df = spark.sql("SELECT 1 AS id")
-
-print(df.collect())
-```
-
 ---
 
 ## 🏷️ Tags & Catalogs
