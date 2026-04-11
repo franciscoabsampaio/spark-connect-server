@@ -142,12 +142,10 @@ def db_backend_url_ssl(container_options, tmp_path):
 
 
 def test_catalog_basic_write_read_ssl(db_backend_url_ssl):
-    cert_path, connection_url = db_backend_url_ssl
+    _, connection_url = db_backend_url_ssl
     
     spark = SparkSession.builder \
         .remote(connection_url) \
-        .config("spark.connect.grpc.ssl.enabled", "true") \
-        .config("spark.connect.grpc.ssl.trustCertCollectionFile", cert_path) \
         .getOrCreate()
 
     catalog = os.getenv("CATALOG", "delta")
