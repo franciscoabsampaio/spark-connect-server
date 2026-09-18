@@ -99,7 +99,7 @@ jobs:
       - name: Test Docker image
         run: |
           pip install -r tests/requirements.txt
-          pip install pyspark==${{ matrix.spark_version }}
+          pip install "pyspark[connect]==${{ matrix.spark_version }}"
 
           CATALOG=${{ matrix.catalog }} \
           CATALOG_VERSION=${{ matrix.catalog_version }} \
