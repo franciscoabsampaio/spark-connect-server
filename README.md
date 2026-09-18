@@ -69,7 +69,7 @@ Available image tags:
 | `delta`          | Spark Connect server with Delta Lake     | Delta 3.3.2 / Spark 3.5.9    | Compatible with Java 17 |
 | `delta-latest`   | Latest tested Delta build                | Delta 4.1.0 / Spark 4.1.3    | Uses Java 21 + Scala 2.13    |
 | `iceberg`        | Spark Connect server with Apache Iceberg | Iceberg 1.6.1 / Spark 3.5.9  | Compatible with Java 17      |
-| `iceberg-latest` | Latest tested Iceberg build              | Iceberg 1.10.2 / Spark 4.1.3 | Uses Java 21 + Scala 2.13    |
+| `iceberg-latest` | Latest tested Iceberg build              | Iceberg 1.11.0 / Spark 4.1.3 | Uses Java 21 + Scala 2.13    |
 
 Each tag corresponds to a prebuilt environment combination of:
 
