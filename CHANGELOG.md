@@ -10,6 +10,8 @@ images themselves rather than to a release number.
 
 ## Unreleased
 
+## 20-09-2026
+
 ### Added
 
 - `HEALTHCHECK` in every image: the container reports healthy once Spark
