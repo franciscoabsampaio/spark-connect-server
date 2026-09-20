@@ -10,7 +10,7 @@ images themselves rather than to a release number.
 
 ## Unreleased
 
-## 20-Sep-2026
+## 2026 Sep 20
 
 ### Added
 
