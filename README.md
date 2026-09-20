@@ -1,6 +1,6 @@
 # Spark Connect Server
 
-![The Docker whale brings the fun!](./docs/docker_whale.webp)
+![The Docker whale brings the fun!](https://raw.githubusercontent.com/franciscoabsampaio/spark-connect-server/main/docs/docker_whale.webp)
 
 This repository contains the necessary Dockerfiles and supplementary code for building images of **Spark Connect servers**, with optional support for **Delta Lake** and **Apache Iceberg** catalogs.
 
