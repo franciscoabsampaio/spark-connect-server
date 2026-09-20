@@ -6,21 +6,32 @@ import time
 import uuid
 
 
-def wait_for_log(container, message, timeout=30):
+def wait_for_server(container, timeout=60):
+    """Block until the Spark Connect server accepts connections.
+
+    Waits on the image's HEALTHCHECK. Images built before it was added report no
+    health status, and are waited on by their startup log line instead.
+    """
     start = time.time()
     while True:
         # Refresh the container object from the Docker daemon
         container.reload()
         logs = container.logs().decode("utf-8")
-        
+
         # Check if the container is still running
         if container.status == "exited":
             raise RuntimeError(f"Container crashed prematurely!\nContainer Logs:\n{logs}")
 
-        if message in logs:
+        health = container.attrs["State"].get("Health", {}).get("Status")
+        if health == "healthy":
+            return
+        if health is None and "Spark Connect server started" in logs:
             return
         if time.time() - start > timeout:
-            raise TimeoutError(f"Message '{message}' not found in logs")
+            raise TimeoutError(
+                f"Server was not ready within {timeout}s (health: {health})"
+                f"\nContainer Logs:\n{logs}"
+            )
         time.sleep(0.5)
 
 
@@ -74,7 +85,7 @@ def db_backend_url(container_options):
     container = docker_client.containers.run(
         **container_options
     )
-    wait_for_log(container, message="Spark Connect server started")
+    wait_for_server(container)
     conn_url = "sc://localhost:15002"
 
     yield conn_url
@@ -127,7 +138,7 @@ def db_backend_url_ssl(container_options, tmp_path):
         volumes={str(ssl_dir): {"bind": "/opt/ssl", "mode": "rw"}},
     )
 
-    wait_for_log(container, message="Spark Connect server started")
+    wait_for_server(container)
 
     # Wait for the cert to be written to the mounted volume
     cert_path = ssl_dir / "spark.crt"

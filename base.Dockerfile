@@ -41,4 +41,14 @@ WORKDIR ${SPARK_HOME}
 EXPOSE 15002/tcp
 EXPOSE 4040/tcp
 
+# Reports the container healthy once Spark Connect accepts connections, so
+# consumers can wait on `docker inspect` health, compose's `service_healthy` or
+# a readiness probe instead of scraping the log. Probed from inside the
+# container: a published port is served by Docker's proxy, which accepts
+# connections before the server itself listens. Failures during `start-period`
+# delay `healthy` rather than marking the container unhealthy, which covers
+# slow JVM startup.
+HEALTHCHECK --interval=5s --timeout=3s --start-period=180s --retries=60 \
+    CMD bash -c 'exec 3<>/dev/tcp/127.0.0.1/15002'
+
 ENTRYPOINT ["sh", "-c", "$SPARK_HOME/entrypoint.sh"]
