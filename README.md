@@ -85,6 +85,12 @@ These images ensure the correct set of JARs and environment variables are config
 
 ---
 
+## 📓 Changelog
+
+Changes to the images are recorded in [`CHANGELOG.md`](https://github.com/franciscoabsampaio/spark-connect-server/blob/main/CHANGELOG.md).
+
+---
+
 ## 🔗 Useful Links
 
 * [Official Spark Docker image tags](https://hub.docker.com/_/spark/tags)
